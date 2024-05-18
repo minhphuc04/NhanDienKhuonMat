@@ -4,6 +4,8 @@
  */
 package Principal;
 
+import Capture.Register;
+
 
 public class Menu extends javax.swing.JFrame {
 
@@ -14,7 +16,7 @@ public class Menu extends javax.swing.JFrame {
     }
 
     private Menu() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        
     }
 
   
@@ -109,7 +111,7 @@ public class Menu extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-    
+     new Register().setVisible(true);
 
     }//GEN-LAST:event_jButton4ActionPerformed
 

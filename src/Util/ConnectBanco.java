@@ -18,15 +18,15 @@ public class ConnectBanco {
     public Statement stm;
     public ResultSet rs;
     public Connection conn;
-     private final  String driver = "org.mysql.Driver";
-    private final  String root = "jdbc.mysql://127.0.0.1/database";
+    private final  String driver = "com.mysql.jdbc.Driver";
+    private final  String root = "jdbc:mysql://127.0.0.1:3307/databasefaceid";
     private final  String user = "root";
     private final  String pass = "";
-    public void conecta(){
+    public void conexao(){
         try{
      System.setProperty("jdbc.Driver ", driver);
     conn = DriverManager.getConnection(root, user , pass);
-    System.out.print("OK");
+    System.out.println("Successfull");
     
         }catch(SQLException e){
         System.out.println("Error: " + e);
@@ -61,6 +61,7 @@ public class ConnectBanco {
     }
     
     }
+   
     
     
 }

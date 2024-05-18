@@ -3,11 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Capture;
+
+import Util.ConnectBanco;
+import Util.ControlPerson;
+import Util.ModelPerson;
+
 public class Register extends javax.swing.JFrame {
+    ConnectBanco connecta = new ConnectBanco();
+      ControlPerson cod;
+        ModelPerson mod;
 
    
     public Register() {
         initComponents();
+        showIdUser();
     }
 
   
@@ -17,46 +26,61 @@ public class Register extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        txt_id_lable = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
-        jTextField5 = new javax.swing.JTextField();
+        txt_last_name = new javax.swing.JTextField();
+        txt_first_name = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jFormattedTextField1 = new javax.swing.JFormattedTextField();
-        jButton2 = new javax.swing.JButton();
+        txt_dob = new javax.swing.JFormattedTextField();
+        txt_office = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Security System - Register Person");
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(240, 240, 240));
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        jPanel1.setLayout(new java.awt.BorderLayout());
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(70, 70, 70));
-        jLabel1.setText(" This person get a ID x");
-        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 10, 240, -1));
+        txt_id_lable.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        txt_id_lable.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        txt_id_lable.setText("1");
+        jPanel2.add(txt_id_lable, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 480, -1));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 490, 60));
+        jButton2.setBackground(new java.awt.Color(23, 229, 104));
+        jButton2.setForeground(new java.awt.Color(255, 255, 255));
+        jButton2.setText("Next");
+        jButton2.setContentAreaFilled(false);
+        jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
+        jButton2.setOpaque(true);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 200, 110, 40));
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        jPanel3.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 30, 190, 30));
-        jPanel3.add(jTextField4, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 90, 190, 30));
 
-        jTextField5.addActionListener(new java.awt.event.ActionListener() {
+        txt_last_name.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField5ActionPerformed(evt);
+                txt_last_nameActionPerformed(evt);
             }
         });
-        jPanel3.add(jTextField5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 190, 30));
+        jPanel3.add(txt_last_name, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 30, 190, 30));
+
+        txt_first_name.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_first_nameActionPerformed(evt);
+            }
+        });
+        jPanel3.add(txt_first_name, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 190, 30));
 
         jLabel2.setForeground(new java.awt.Color(100, 100, 100));
         jLabel2.setText("Last Name");
@@ -75,39 +99,45 @@ public class Register extends javax.swing.JFrame {
         jPanel3.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, -1));
 
         try {
-            jFormattedTextField1.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
+            txt_dob.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##/##/####")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
-        jPanel3.add(jFormattedTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 190, 30));
+        jPanel3.add(txt_dob, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 190, 30));
 
-        jButton2.setBackground(new java.awt.Color(23, 229, 104));
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setText("Save");
-        jButton2.setContentAreaFilled(false);
-        jButton2.setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
-        jButton2.setOpaque(true);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-        jPanel3.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 140, 110, 40));
+        txt_office.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel3.add(txt_office, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 90, 190, 30));
 
-        jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, 490, 230));
+        jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 512, 310));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 510, 360));
+        jPanel1.add(jPanel2, java.awt.BorderLayout.CENTER);
+
+        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
         setBounds(0, 0, 526, 395);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField5ActionPerformed
+    private void txt_first_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_first_nameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField5ActionPerformed
+    }//GEN-LAST:event_txt_first_nameActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        
+      cod = new ControlPerson();
+      mod = new ModelPerson();
+     
+       mod.setFisrt_name(txt_first_name.getText());
+        mod.setLast_name(txt_last_name.getText());
+         mod.setDob(txt_dob.getText());
+          mod.setOffice(txt_office.getText());
+       cod.inserir(mod);
+       
+       
+          
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void txt_last_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_last_nameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_last_nameActionPerformed
 
     /**
      * @param args the command line arguments
@@ -146,8 +176,6 @@ public class Register extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton2;
-    private javax.swing.JFormattedTextField jFormattedTextField1;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -155,10 +183,31 @@ public class Register extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
+    private javax.swing.JFormattedTextField txt_dob;
+    private javax.swing.JTextField txt_first_name;
+    private javax.swing.JLabel txt_id_lable;
+    private javax.swing.JTextField txt_last_name;
+    private javax.swing.JTextField txt_office;
     // End of variables declaration//GEN-END:variables
+
+    private void showIdUser() {
+       connecta.conexao();
+       try{
+           connecta.executeSQL("SELECT * FROM person ORDER BY id DESC LIMIT 1 ");
+           connecta.rs.first();
+           txt_id_lable.setText(String.valueOf(connecta.rs.getInt("id")));
+           int id  = Integer.parseInt(txt_id_lable.getText());
+          id++;
+           txt_id_lable.setText(String.valueOf(id));
+          
+         
+       }
+       catch(Exception e){
+       
+       }
+        
+    }
+    
 
     
 }
