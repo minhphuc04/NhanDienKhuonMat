@@ -7,7 +7,7 @@ package Capture;
 /**
  *
  * @author ADMIN
- *///
+ *///Phuc dep trai
 public class Capture extends javax.swing.JFrame {
     // private Capture.DaemonThread myThread = null;
 
