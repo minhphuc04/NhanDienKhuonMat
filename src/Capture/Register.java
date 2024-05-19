@@ -20,6 +20,7 @@ public class Register extends javax.swing.JFrame {
     }
 
   //
+    //
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -197,10 +198,10 @@ public class Register extends javax.swing.JFrame {
            connecta.rs.first();
            txt_id_lable.setText(String.valueOf(connecta.rs.getInt("id")));
            int id  = Integer.parseInt(txt_id_lable.getText());
-          id++;
+            id++;
            txt_id_lable.setText(String.valueOf(id));
           
-         
+          
        }
        catch(Exception e){
        
