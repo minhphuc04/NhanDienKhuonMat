@@ -4,13 +4,45 @@
  */
 package Capture;
 
+import Util.ConnectBanco;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.JOptionPane;
+import org.bytedeco.javacpp.BytePointer;
+import static org.bytedeco.opencv.global.opencv_cudaimgproc.cvtColor;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imencode;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGRA2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.rectangle;
+import org.bytedeco.opencv.global.opencv_objdetect;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
+import org.bytedeco.opencv.opencv_videoio.VideoCapture;
+
 /**
  *
  * @author ADMIN
  *///Phuc dep trai
 public class Capture extends javax.swing.JFrame {
-    // private Capture.DaemonThread myThread = null;
-
+    private Capture.DaemonThread myThread = null;
+    VideoCapture webSource = null;
+    Mat cameraImage = new Mat();
+    CascadeClassifier cascade = new CascadeClassifier(" ");
+    BytePointer mem = new BytePointer();
+    RectVector detectedFaces = new RectVector();
+    String root;
+    int numSamples = 25, sample =1;
+    ConnectBanco conecta = new ConnectBanco();
+    
+    
     /**
      * Creates new form Capture
      */
@@ -29,10 +61,10 @@ public class Capture extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        label_photo = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        couterLable = new javax.swing.JLabel();
+        saveButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Security System - Capture Photos");
@@ -45,29 +77,29 @@ public class Capture extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("CAPTURE 25 SNAPSHOTS");
 
-        jLabel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(200, 200, 200)));
+        label_photo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(200, 200, 200)));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setBackground(new java.awt.Color(51, 153, 255));
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("00");
-        jLabel3.setOpaque(true);
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, 90, 40));
+        couterLable.setBackground(new java.awt.Color(51, 153, 255));
+        couterLable.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        couterLable.setForeground(new java.awt.Color(255, 255, 255));
+        couterLable.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        couterLable.setText("00");
+        couterLable.setOpaque(true);
+        jPanel2.add(couterLable, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, 90, 40));
 
-        jButton1.setBackground(new java.awt.Color(255, 102, 102));
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Capture");
-        jButton1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        saveButton.setBackground(new java.awt.Color(255, 102, 102));
+        saveButton.setForeground(new java.awt.Color(255, 255, 255));
+        saveButton.setText("Capture");
+        saveButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                saveButtonActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 60, 90, 20));
+        jPanel2.add(saveButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 60, 90, 20));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -79,7 +111,7 @@ public class Capture extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(label_photo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -91,7 +123,7 @@ public class Capture extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(label_photo, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addContainerGap())
@@ -101,9 +133,9 @@ public class Capture extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_saveButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -141,11 +173,77 @@ public class Capture extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel couterLable;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel label_photo;
+    private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
+    class DaemonThread implements Runnable {
+    protected volatile boolean runnable = false;
+            @Override
+            public void run(){
+            synchronized (this){
+            while (runnable){
+            try {
+            if (webSource.grab()){
+            webSource.retrieve(cameraImage);
+            Graphics g = label_photo.getGraphics();
+            Mat imageColor = new Mat();
+            imageColor = cameraImage;
+            Mat imageGray = new Mat();
+            cvtColor(imageColor ,imageGray, COLOR_BGRA2GRAY);
+            RectVector detectedFaces = new RectVector();
+            cascade.detectMultiScale(imageColor,detectedFaces,1.1,1,0, new Size(150,150), new Size(500,500));
+            for(int i = 0;i<detectedFaces.size();i++){
+            Rect dadosFace = detectedFaces.get(0);
+            rectangle(imageColor,dadosFace, new Scalar(255,255,255,5));
+            Mat face = new Mat(imageGray,dadosFace);
+            opencv_imgproc.resize(face, face, new Size(160,160));
+            if(saveButton.getModel().isPressed()){
+            if(sample <= numSamples){
+            String cropped = "C:\\photos\\person." + "." + sample + ".jpg";
+            imvrite(cropped, face);
+            couterLable.setText(String.valueOf(sample));
+            sample++;
+            }
+             if(sample > 25){
+            gerar();
+            insereBanco();
+            System.out.println("File Generated");
+            parar();
+            }
+          }
+        }
+            imencode(".bmp",cameraImage,mem);
+            Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes())) ;
+            BufferedImage buff = (BufferedImage) im;
+            if(g.drawImage(buff,0,0,getWidth(),getHeight() - 90, 0, 0, buff.getWidth(), buff.getHeight(), null)){
+            if(runnable == false){
+                System.out.println("Salve a Foto");
+                this.wait();
+            }
+          }
+        }
+      }
+            catch (IOException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null , "Error ao iniciar camera (IOEx)\n"+ ex);
+            }
+            catch (InterruptedException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, " Error ao iniciar camera (Interrupted)\n" + ex);
+            }
+          }
+        }
+      }
+
+        private void imvrite(String cropped, Mat face) {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+
+
 }
+}
+
