@@ -5,13 +5,10 @@
 package Capture;
 
 import Util.ConnectBanco;
-import Util.ControlPerson;
-import Util.ModelPerson;
 
 public class Register extends javax.swing.JFrame {
     ConnectBanco connecta = new ConnectBanco();
-      ControlPerson cod;
-        ModelPerson mod;
+  
 
    
     public Register() {
@@ -119,19 +116,18 @@ public class Register extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txt_first_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_first_nameActionPerformed
+     
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_first_nameActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-      cod = new ControlPerson();
-      mod = new ModelPerson();
-     
-       mod.setFisrt_name(txt_first_name.getText());
-        mod.setLast_name(txt_last_name.getText());
-         mod.setDob(txt_dob.getText());
-          mod.setOffice(txt_office.getText());
-       cod.inserir(mod);
-       
+    String fName = txt_first_name.getText();
+    String lName = txt_last_name.getText();
+    String dob = txt_dob.getText();
+    String office = txt_office.getText();
+    int id  = Integer.parseInt(txt_id_lable.getText().replace("ID: ", ""));
+    
+       new Capture(id, fName, lName,office,dob).setVisible(true);
        
           
     }//GEN-LAST:event_jButton2ActionPerformed

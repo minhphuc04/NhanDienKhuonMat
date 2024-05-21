@@ -5,25 +5,36 @@
 package Capture;
 
 import Util.ConnectBanco;
+import Util.ControlPerson;
+import Util.ModelPerson;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.IntBuffer;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.bytedeco.javacpp.BytePointer;
+import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
 import static org.bytedeco.opencv.global.opencv_cudaimgproc.cvtColor;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imencode;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGRA2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.rectangle;
 import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_face.FaceRecognizer;
+import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 
@@ -35,19 +46,29 @@ public class Capture extends javax.swing.JFrame {
     private Capture.DaemonThread myThread = null;
     VideoCapture webSource = null;
     Mat cameraImage = new Mat();
-    CascadeClassifier cascade = new CascadeClassifier(" ");
+    CascadeClassifier cascade = new CascadeClassifier("C:\\photos\\haarcascade_frontalface_alt.xml");
     BytePointer mem = new BytePointer();
     RectVector detectedFaces = new RectVector();
-    String root;
-    int numSamples = 25, sample =1;
+    String root, firstNamePerson, lastNamePerson, officePerson, dobPerson;
+    int numSamples = 25, sample =1,idPerson;
     ConnectBanco conecta = new ConnectBanco();
     
     
     /**
      * Creates new form Capture
      */
-    public Capture() {
+    public Capture(int id, String fName, String lName,String office, String dob) {
         initComponents();
+        idPerson = id;
+        firstNamePerson =  fName;
+        lastNamePerson = lName;
+        officePerson = office;
+        dobPerson = dob;
+        startCamera();
+    }
+
+    private Capture() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     /**
@@ -77,6 +98,7 @@ public class Capture extends javax.swing.JFrame {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("CAPTURE 25 SNAPSHOTS");
 
+        label_photo.setBackground(new java.awt.Color(255, 255, 255));
         label_photo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(200, 200, 200)));
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
@@ -91,7 +113,7 @@ public class Capture extends javax.swing.JFrame {
         jPanel2.add(couterLable, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 10, 90, 40));
 
         saveButton.setBackground(new java.awt.Color(255, 102, 102));
-        saveButton.setForeground(new java.awt.Color(255, 255, 255));
+        saveButton.setForeground(new java.awt.Color(255, 255, 204));
         saveButton.setText("Capture");
         saveButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         saveButton.addActionListener(new java.awt.event.ActionListener() {
@@ -167,7 +189,7 @@ public class Capture extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Capture().setVisible(true);
+             new Capture().setVisible(true);
             }
         });
     }
@@ -203,16 +225,16 @@ public class Capture extends javax.swing.JFrame {
             opencv_imgproc.resize(face, face, new Size(160,160));
             if(saveButton.getModel().isPressed()){
             if(sample <= numSamples){
-            String cropped = "C:\\photos\\person." + "." + sample + ".jpg";
-            imvrite(cropped, face);
+            String cropped = "C:\\photos\\person."+ idPerson + "." + sample + ".jpg";
+           imwrite(cropped, face);
             couterLable.setText(String.valueOf(sample));
             sample++;
             }
              if(sample > 25){
-            gerar();
-            insereBanco();
+            generate();
+            insertDatabase();
             System.out.println("File Generated");
-            parar();
+            stopCamera();
             }
           }
         }
@@ -239,11 +261,69 @@ public class Capture extends javax.swing.JFrame {
         }
       }
 
-        private void imvrite(String cropped, Mat face) {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-        }
+
+
+      
+          
+
 
 
 }
+private void generate() {
+    File directory = new File("C:\\photos\\");
+    FilenameFilter filter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+           return name.endsWith(".jpg") || name.endsWith(".png");
+           
+        }
+    };
+    File[] files = directory.listFiles();
+    MatVector photos = new MatVector(files.length);
+    Mat labels = new Mat(files.length, 1,CV_32SC1);
+    IntBuffer labelsBuffer = labels.createBuffer();
+    int counter = 0;
+     for (File image : files) {
+        Mat photo = opencv_imgcodecs.imread(image.getAbsolutePath(), opencv_imgcodecs.IMREAD_GRAYSCALE);
+        int idP = Integer.parseInt(image.getName().split("\\.")[1]);
+        opencv_imgproc.resize(photo, photo, new Size(160, 160));
+        photos.put(counter, photo);
+        labelsBuffer.put(counter, idP);
+        counter++;
+    }
+     FaceRecognizer lbph = LBPHFaceRecognizer.create();
+     lbph.train(photos, labels);
+     lbph.save("C:\\photos\\classifierLBPH.yml");
+}
+
+
+        private void insertDatabase() {
+         ControlPerson cod = new ControlPerson();
+        ModelPerson mod = new ModelPerson();
+          
+       mod.setFisrt_name(firstNamePerson);
+        mod.setLast_name(lastNamePerson);
+         mod.setDob(dobPerson);
+          mod.setOffice(officePerson);
+       cod.inserir(mod);
+            
+        }
+           private void stopCamera() {
+               myThread.runnable = false;
+            webSource.release();
+            dispose();
+        }
+              private void startCamera() {
+                  webSource = new VideoCapture(0);
+                  
+            myThread = new Capture.DaemonThread();
+            Thread t = new Thread(myThread);
+            t.setDaemon(true);
+            webSource.release();
+            myThread.runnable = true;
+            t.start();
+            
+            
+        }
 }
 
