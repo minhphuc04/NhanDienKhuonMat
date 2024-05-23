@@ -18,6 +18,7 @@ import java.nio.IntBuffer;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
 import static org.bytedeco.opencv.global.opencv_cudaimgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -43,24 +44,23 @@ import org.bytedeco.opencv.opencv_videoio.VideoCapture;
  * @author ADMIN
  *///Phuc dep trai
 public class Capture extends javax.swing.JFrame {
-    private Capture.DaemonThread myThread = null;
+    private DaemonThread myThread = null;
     VideoCapture webSource = null;
     Mat cameraImage = new Mat();
     CascadeClassifier cascade = new CascadeClassifier("C:\\photos\\haarcascade_frontalface_alt.xml");
     BytePointer mem = new BytePointer();
     RectVector detectedFaces = new RectVector();
     String root, firstNamePerson, lastNamePerson, officePerson, dobPerson;
-    int numSamples = 25, sample =1,idPerson;
+    int numSamples = 25, sample = 1, idPerson;
     ConnectBanco conecta = new ConnectBanco();
-    
-    
+
     /**
      * Creates new form Capture
      */
-    public Capture(int id, String fName, String lName,String office, String dob) {
+    public Capture(int id, String fName, String lName, String office, String dob) {
         initComponents();
         idPerson = id;
-        firstNamePerson =  fName;
+        firstNamePerson = fName;
         lastNamePerson = lName;
         officePerson = office;
         dobPerson = dob;
@@ -68,7 +68,7 @@ public class Capture extends javax.swing.JFrame {
     }
 
     private Capture() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -202,105 +202,88 @@ public class Capture extends javax.swing.JFrame {
     private javax.swing.JLabel label_photo;
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
-    class DaemonThread implements Runnable {
-    protected volatile boolean runnable = false;
-            @Override
-            public void run(){
-            synchronized (this){
-            while (runnable){
-            try {
-            if (webSource.grab()){
-            webSource.retrieve(cameraImage);
-            Graphics g = label_photo.getGraphics();
-            Mat imageColor = new Mat();
-            imageColor = cameraImage;
-            Mat imageGray = new Mat();
-            cvtColor(imageColor ,imageGray, COLOR_BGRA2GRAY);
-            RectVector detectedFaces = new RectVector();
-            cascade.detectMultiScale(imageColor,detectedFaces,1.1,1,0, new Size(150,150), new Size(500,500));
-            for(int i = 0;i<detectedFaces.size();i++){
-            Rect dadosFace = detectedFaces.get(0);
-            rectangle(imageColor,dadosFace, new Scalar(255,255,255,5));
-            Mat face = new Mat(imageGray,dadosFace);
-            opencv_imgproc.resize(face, face, new Size(160,160));
-            if(saveButton.getModel().isPressed()){
-            if(sample <= numSamples){
-            String cropped = "C:\\photos\\person."+ idPerson + "." + sample + ".jpg";
-           imwrite(cropped, face);
-            couterLable.setText(String.valueOf(sample));
-            sample++;
-            }
-             if(sample > 25){
-            generate();
-            insertDatabase();
-            System.out.println("File Generated");
-            stopCamera();
-            }
-          }
-        }
-            imencode(".bmp",cameraImage,mem);
-            Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes())) ;
-            BufferedImage buff = (BufferedImage) im;
-            if(g.drawImage(buff,0,0,getWidth(),getHeight() - 90, 0, 0, buff.getWidth(), buff.getHeight(), null)){
-            if(runnable == false){
-                System.out.println("Salve a Foto");
-                this.wait();
-            }
-          }
-        }
-      }
-            catch (IOException ex){
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null , "Error ao iniciar camera (IOEx)\n"+ ex);
-            }
-            catch (InterruptedException ex){
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, " Error ao iniciar camera (Interrupted)\n" + ex);
-            }
-          }
-        }
-      }
+  class DaemonThread implements Runnable {
+        protected volatile boolean runnable = false;
 
-
-
-      
-          
-
-
-
-}
-private void generate() {
-    File directory = new File("C:\\photos\\");
-    FilenameFilter filter = new FilenameFilter() {
         @Override
-        public boolean accept(File dir, String name) {
-           return name.endsWith(".jpg") || name.endsWith(".png");
-           
+        public void run() {
+            synchronized (this) {
+                while (runnable) {
+                    try {
+                        if (webSource.grab()) {
+                            webSource.retrieve(cameraImage);
+                            Graphics g = label_photo.getGraphics();
+                            Mat imageColor = cameraImage;
+                            Mat imageGray = new Mat();
+                            opencv_imgproc.cvtColor(imageColor, imageGray, opencv_imgproc.COLOR_BGR2GRAY);
+                            detectedFaces.clear();
+                            cascade.detectMultiScale(imageGray, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+                            for (int i = 0; i < detectedFaces.size(); i++) {
+                                Rect dadosFace = detectedFaces.get(i);
+                                opencv_imgproc.rectangle(imageColor, dadosFace, new Scalar(255, 255, 255, 5));
+                                Mat face = new Mat(imageGray, dadosFace);
+                                opencv_imgproc.resize(face, face, new Size(160, 160));
+                                if (saveButton.getModel().isPressed()) {
+                                    if (sample <= numSamples) {
+                                        String cropped = "C:\\photos\\person." + idPerson + "." + sample + ".jpg";
+                                        opencv_imgcodecs.imwrite(cropped, face);
+                                        couterLable.setText(String.valueOf(sample));
+                                        sample++;
+                                    }
+                                    if (sample > numSamples) {
+                                        generate();
+                                        insertDatabase();
+                                        System.out.println("File Generated");
+                                        stopCamera();
+                                    }
+                                }
+                            }
+                            imencode(".bmp", cameraImage, mem);
+                            Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes()));
+                            BufferedImage buff = (BufferedImage) im;
+                            if (g.drawImage(buff, 0, 0, getWidth(), getHeight() - 90, 0, 0, buff.getWidth(), buff.getHeight(), null)) {
+                                if (!runnable) {
+                                    System.out.println("Save the Photo");
+                                    this.wait();
+                                }
+                            }
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Error ao iniciar camera (IOEx)\n" + ex);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Error ao iniciar camera (Interrupted)\n" + ex);
+                    }
+                }
+            }
         }
-    };
-    File[] files = directory.listFiles();
-    MatVector photos = new MatVector(files.length);
-    Mat labels = new Mat(files.length, 1,CV_32SC1);
-    IntBuffer labelsBuffer = labels.createBuffer();
-    int counter = 0;
-     for (File image : files) {
-        Mat photo = opencv_imgcodecs.imread(image.getAbsolutePath(), opencv_imgcodecs.IMREAD_GRAYSCALE);
-        int idP = Integer.parseInt(image.getName().split("\\.")[1]);
-        opencv_imgproc.resize(photo, photo, new Size(160, 160));
-        photos.put(counter, photo);
-        labelsBuffer.put(counter, idP);
-        counter++;
     }
-     FaceRecognizer lbph = LBPHFaceRecognizer.create();
-     lbph.train(photos, labels);
-     lbph.save("C:\\photos\\classifierLBPH.yml");
-}
 
+    private void generate() {
+        File directory = new File("C:\\photos\\");
+        FilenameFilter filter = (dir, name) -> name.endsWith(".jpg") || name.endsWith(".png");
+        File[] files = directory.listFiles(filter);
+        MatVector photos = new MatVector(files.length);
+        Mat labels = new Mat(files.length, 1, opencv_core.CV_32SC1);
+        IntBuffer labelsBuffer = labels.createBuffer();
+        int counter = 0;
+        for (File image : files) {
+            Mat photo = opencv_imgcodecs.imread(image.getAbsolutePath(), opencv_imgcodecs.IMREAD_GRAYSCALE);
+            int idP = Integer.parseInt(image.getName().split("\\.")[1]);
+            opencv_imgproc.resize(photo, photo, new Size(160, 160));
+            photos.put(counter, photo);
+            labelsBuffer.put(counter, idP);
+            counter++;
+        }
+        FaceRecognizer lbph = LBPHFaceRecognizer.create();
+        lbph.train(photos, labels);
+        lbph.save("C:\\photos\\classifierLBPH.yml");
+    }
 
-        private void insertDatabase() {
+     private void insertDatabase() {
          ControlPerson cod = new ControlPerson();
         ModelPerson mod = new ModelPerson();
-          
        mod.setFisrt_name(firstNamePerson);
         mod.setLast_name(lastNamePerson);
          mod.setDob(dobPerson);
@@ -308,22 +291,19 @@ private void generate() {
        cod.inserir(mod);
             
         }
-           private void stopCamera() {
-               myThread.runnable = false;
-            webSource.release();
-            dispose();
-        }
-              private void startCamera() {
-                  webSource = new VideoCapture(0);
-                  
-            myThread = new Capture.DaemonThread();
-            Thread t = new Thread(myThread);
-            t.setDaemon(true);
-            webSource.release();
-            myThread.runnable = true;
-            t.start();
-            
-            
-        }
-}
+    private void stopCamera() {
+        myThread.runnable = false;
+        webSource.release();
+        dispose();
+    }
 
+    private void startCamera() {
+        webSource = new VideoCapture(0);
+        myThread = new DaemonThread();
+        Thread t = new Thread(myThread);
+        t.setDaemon(true);
+        myThread.runnable = true;
+        t.start();
+    }
+
+}
