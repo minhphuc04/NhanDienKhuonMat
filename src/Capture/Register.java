@@ -126,6 +126,7 @@ public class Register extends javax.swing.JFrame {
     String dob = txt_dob.getText();
     String office = txt_office.getText();
     int id  = Integer.parseInt(txt_id_lable.getText().replace("ID: ", ""));
+    System.out.println(id);
     
        new Capture(id, fName, lName,office,dob).setVisible(true);
        
@@ -189,8 +190,9 @@ public class Register extends javax.swing.JFrame {
 
     private void showIdUser() {
        connecta.conexao();
+              connecta.executeSQL("SELECT * FROM person ORDER BY id DESC LIMIT 1 ");
        try{
-           connecta.executeSQL("SELECT * FROM person ORDER BY id DESC LIMIT 1 ");
+    
            connecta.rs.first();
            txt_id_lable.setText(String.valueOf(connecta.rs.getInt("id")));
            int id  = Integer.parseInt(txt_id_lable.getText());

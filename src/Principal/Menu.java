@@ -5,6 +5,7 @@
 package Principal;
 
 import Capture.Register;
+import Recognizer.Recognizer;
 
 
 public class Menu extends javax.swing.JFrame {
@@ -116,13 +117,13 @@ public class Menu extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-   
+    new Recognizer().setVisible(true);
 
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-   
 
+    new Recognizer().setVisible(true);
     }//GEN-LAST:event_jButton6ActionPerformed
 
     /**

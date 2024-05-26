@@ -19,15 +19,9 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
-import static org.bytedeco.opencv.global.opencv_cudaimgproc.cvtColor;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imencode;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGRA2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.rectangle;
-import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -284,6 +278,7 @@ public class Capture extends javax.swing.JFrame {
      private void insertDatabase() {
          ControlPerson cod = new ControlPerson();
         ModelPerson mod = new ModelPerson();
+         mod.setId(idPerson);
        mod.setFisrt_name(firstNamePerson);
         mod.setLast_name(lastNamePerson);
          mod.setDob(dobPerson);
