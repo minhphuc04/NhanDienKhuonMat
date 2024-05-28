@@ -62,11 +62,8 @@ public class ModelPerson {
     public String getOffice() {
         return office;
     }
-
+    
     public void setOffice(String office) {
         this.office = office;
-    }
-    
-    
-    
+    }            
 }

@@ -6,10 +6,7 @@ package Util;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- *
- * @author Thinh
- */
+
 public class ControlPerson {
     ConnectBanco conecta = new ConnectBanco();
     public void inserir(ModelPerson mod){

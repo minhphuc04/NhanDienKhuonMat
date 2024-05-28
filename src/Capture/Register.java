@@ -104,6 +104,11 @@ public class Register extends javax.swing.JFrame {
         jPanel3.add(txt_dob, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 190, 30));
 
         txt_office.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        txt_office.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_officeActionPerformed(evt);
+            }
+        });
         jPanel3.add(txt_office, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 90, 190, 30));
 
         jPanel2.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 512, 310));
@@ -136,6 +141,10 @@ public class Register extends javax.swing.JFrame {
     private void txt_last_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_last_nameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_last_nameActionPerformed
+
+    private void txt_officeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_officeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_officeActionPerformed
 
     /**
      * @param args the command line arguments

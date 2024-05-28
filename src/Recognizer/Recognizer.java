@@ -5,14 +5,19 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imencode;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.rectangle;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -23,7 +28,6 @@ import org.bytedeco.opencv.opencv_face.FaceRecognizer;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-
 public class Recognizer extends javax.swing.JFrame {
         private Recognizer.DaemonThread myThread = null;
     VideoCapture webSource = null;
@@ -35,7 +39,7 @@ public class Recognizer extends javax.swing.JFrame {
     BytePointer mem = new BytePointer();
     RectVector detectedFaces = new RectVector();
     String root, firstNamePerson, lastNamePerson, officePerson, dobPerson;
-    int numSamples = 25, sample = 1, idPerson;
+    int idPerson ;
     ConnectBanco conecta = new ConnectBanco();
 
 
@@ -153,93 +157,110 @@ class DaemonThread implements Runnable {
     protected volatile boolean runnable = false;
 
     @Override
-    public void run() {
-        synchronized (this) {
-            while (runnable) {
-                try {
-                    if (webSource.grab()) {
-                        webSource.retrieve(cameraImage);
-                        Graphics g = label_photo.getGraphics();
-                        if (g != null) { // Kiểm tra g có null hay không
-                            Mat imageColor = cameraImage;
-                            Mat imageGray = new Mat();
-                            opencv_imgproc.cvtColor(imageColor, imageGray, opencv_imgproc.COLOR_BGR2GRAY);
-                            RectVector detectedFace = new RectVector();
-                            cascade.detectMultiScale(imageGray, detectedFace, 1.1, 2, 0, new Size(150, 150), new Size(500, 500));
-                            for (int i = 0; i < detectedFace.size(); i++) {
-                                Rect dadosFace = detectedFace.get(i);
-                                rectangle(cameraImage, dadosFace, new Scalar(0, 255, 0, 0));
-                                Mat faceCapturada = new Mat(imageGray, dadosFace);
-                                opencv_imgproc.resize(faceCapturada, faceCapturada, new Size(160, 160));
-                                IntPointer rotulo = new IntPointer(1);
-                                DoublePointer confidence = new DoublePointer(1);
-                                recognizer.predict(faceCapturada, rotulo, confidence);
-                                int prediction = rotulo.get(0);
-                                String name = null;
-                                  if (prediction == -1)   {
-                                    label_name.setText("Desconhecido");
-                                    labelOffice.setText("");
-                                    idPerson = 0;
-                                } 
-                             else   {
-                                    System.out.println(confidence.get(0));
-                                    idPerson = prediction;
-                                    rec();
+   public void run() {
+            synchronized (this) {
+                while (runnable) {
+                    try {
+                        if (webSource.grab()) {
+                            webSource.retrieve(cameraImage);
+                            Graphics g = label_photo.getGraphics();
+                            if (g != null) {
+                                Mat imageColor = cameraImage;
+                                Mat imageGray = new Mat();
+                                opencv_imgproc.cvtColor(imageColor, imageGray, COLOR_BGR2GRAY);
+                                RectVector detectedFace = new RectVector();
+                                cascade.detectMultiScale(imageGray, detectedFace, 1.1, 2, 0, new Size(150, 150), new Size(500, 500));
+                                for (int i = 0; i < detectedFace.size(); i++) {
+                                    Rect dadosFace = detectedFace.get(i);
+                                    rectangle(cameraImage, dadosFace, new Scalar(0, 255, 0, 0));
+                                    Mat faceCapturada = new Mat(imageGray, dadosFace);
+                                    opencv_imgproc.resize(faceCapturada, faceCapturada, new Size(160, 160));
+                                    IntPointer rotulo = new IntPointer(1);
+                                    DoublePointer confidence = new DoublePointer(1);
+                                    recognizer.predict(faceCapturada, rotulo, confidence);
+                                    int prediction = rotulo.get(0);
+                                    if (prediction == -1) {
+                                        label_name.setText("Desconhecido");
+                                        labelOffice.setText("");
+                                        idPerson = 0;
+                                    } else {
+                                        System.out.println(confidence.get(0));
+                                        idPerson = prediction;
+                                        rec();
+                                    }
                                 }
-                             
-                            }
-                            imencode(".bmp", cameraImage, mem);
-                            Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes()));
-                            BufferedImage buff = (BufferedImage) im;
-                            if (g.drawImage(buff, 0, 0, getWidth(), getHeight() - 100, 0, 0, buff.getWidth(), buff.getHeight(), null)) {
-                                if (!runnable) {
-                                    System.out.println("Salve a Foto");
-                                    this.wait();
+                                imencode(".bmp", cameraImage, mem);
+                                Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes()));
+                                BufferedImage buff = (BufferedImage) im;
+                                if (g.drawImage(buff, 0, 0, getWidth(), getHeight() - 100, 0, 0, buff.getWidth(), buff.getHeight(), null)) {
+                                    if (!runnable) {
+                                        System.out.println("Salve a Foto");
+                                        this.wait();
+                                    }
                                 }
+                            } else {
+                                System.out.println("Graphics object is null.");
                             }
-                        } else {
-                            System.out.println("Graphics object is null.");
                         }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Error ao iniciar camera (IOException)\n" + ex);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Error ao iniciar camera (InterruptedException)\n" + ex);
                     }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Error ao iniciar camera (IOException)\n" + ex);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "Error ao iniciar camera (InterruptedException)\n" + ex);
                 }
             }
         }
-    }
 }
 
 
 private void rec() {
-    SwingWorker worker = new SwingWorker() {
+    SwingWorker<Void, Void> worker = new SwingWorker<>() {
         @Override
-        protected Object doInBackground() throws Exception {
+        protected Void doInBackground() throws Exception {
             conecta.conexao();
-            try {
-                String SQL = "SELECT * FROM person WHERE id = " + String.valueOf(idPerson);
-                conecta.executaSQL(SQL);
-                while (conecta.rs.next()) {
-                    label_name.setText(conecta.rs.getString("first_name") + "  " + conecta.rs.getString("last_name"));
-                    labelOffice.setText(conecta.rs.getString("office"));
-                    System.out.println("Person: " + conecta.rs.getString("id"));
-                    java.sql.Array ident = conecta.rs.getArray("first_name"); 
-                    String[] person = (String[]) ident.getArray();
-                    for(int i = 0; i <person.length;i++) {
-                        System.out.println(person[i]);
+            String SQL = "SELECT * FROM person WHERE id = ?";
+            try (PreparedStatement stmt = conecta.conn.prepareStatement(SQL)) {
+                stmt.setInt(1, idPerson);
+                conecta.rs = stmt.executeQuery();
+                if (conecta.rs.next()) {
+                    String firstName = conecta.rs.getString("first_name");
+                    String lastName = conecta.rs.getString("last_name");
+                    String office = conecta.rs.getString("office");
+                    String dob = conecta.rs.getString("dob");
+
+                    SwingUtilities.invokeLater(() -> {
+                        label_name.setText(firstName + " " + lastName);
+                        labelOffice.setText(office);
+                    });
+
+                    // Kiểm tra xem ResultSet có đóng trước khi gọi phương thức getInt("id") hay không
+                    if (!conecta.rs.isClosed()) {
+                        System.out.println("Person: " + conecta.rs.getInt("id"));
+                        System.out.println("hahaha: " + lastName );
                     }
                 }
-            } catch (Exception e) {
-            } 
-             conecta.desconecta();
+            } catch (SQLException e) {
+                System.err.println("SQL Exception: " + e.getMessage());
+                e.printStackTrace();
+            } finally {
+                if (conecta.rs != null && !conecta.rs.isClosed()) {
+                    conecta.rs.close();
+                }
+                conecta.desconecta();
+            }
             return null;
         }
     };
     worker.execute();
 }
+
+
+
+
+
+
     private void stopCamera() {
         myThread.runnable = false;
         webSource.release();
