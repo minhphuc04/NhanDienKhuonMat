@@ -166,13 +166,15 @@ class DaemonThread implements Runnable {
                             Graphics g = label_photo.getGraphics();
                             if (g != null) {
                                 Mat imageColor = cameraImage;
-                                Mat imageGray = new Mat();
+                                Mat imageGray = new Mat();//hahahahaha
                                 opencv_imgproc.cvtColor(imageColor, imageGray, COLOR_BGR2GRAY);
                                 RectVector detectedFace = new RectVector();
                                 cascade.detectMultiScale(imageGray, detectedFace, 1.1, 2, 0, new Size(150, 150), new Size(500, 500));
+                                //Ve hinh cn
                                 for (int i = 0; i < detectedFace.size(); i++) {
                                     Rect dadosFace = detectedFace.get(i);
                                     rectangle(cameraImage, dadosFace, new Scalar(0, 255, 0, 0));
+                                    //Nhan dien
                                     Mat faceCapturada = new Mat(imageGray, dadosFace);
                                     opencv_imgproc.resize(faceCapturada, faceCapturada, new Size(160, 160));
                                     IntPointer rotulo = new IntPointer(1);
@@ -180,7 +182,7 @@ class DaemonThread implements Runnable {
                                     recognizer.predict(faceCapturada, rotulo, confidence);
                                     int prediction = rotulo.get(0);
                                     if (prediction == -1) {
-                                        label_name.setText("Desconhecido");
+                                        label_name.setText("Không nhận diện được");
                                         labelOffice.setText("");
                                         idPerson = 0;
                                     } else {
@@ -189,6 +191,7 @@ class DaemonThread implements Runnable {
                                         rec();
                                     }
                                 }
+                                //Hien thi hinh anh
                                 imencode(".bmp", cameraImage, mem);
                                 Image im = ImageIO.read(new ByteArrayInputStream(mem.getStringBytes()));
                                 BufferedImage buff = (BufferedImage) im;

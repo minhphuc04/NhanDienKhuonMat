@@ -19,7 +19,7 @@ public class ConnectBanco {
     public ResultSet rs;
     public Connection conn;
     private final  String driver = "com.mysql.jdbc.Driver";
-    private final  String root = "jdbc:mysql://127.0.0.1:3307/databasefaceid";
+    private final  String root = "jdbc:mysql://127.0.0.1:3306/databasefaced";
     private final  String user = "root";
     private final  String pass = "";
     public void conexao(){

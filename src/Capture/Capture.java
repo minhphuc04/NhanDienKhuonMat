@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Capture;
+//Phuc dep trai nhat trai dat
 
 import Util.ConnectBanco;
 import Util.ControlPerson;
